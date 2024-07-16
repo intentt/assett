@@ -1,3 +1,3 @@
-module github.com/intentt/esbuild-meta
+module github.com/intentt/assett
 
 go 1.22.5
