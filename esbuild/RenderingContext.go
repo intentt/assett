@@ -3,11 +3,13 @@ package esbuild
 import (
 	"fmt"
 	"html/template"
+
+	"github.com/intentt/assett/assetpath"
 )
 
 type RenderingContext struct {
 	MetafileIndex   *MetafileIndex
-	PathTransformer PathTransformer
+	PathTransformer assetpath.PathTransformer
 	preloadables    []string
 	scripts         string
 	stylesheets     string
@@ -36,7 +38,7 @@ func (self *RenderingContext) Script(entryPoint string) error {
 
 	self.stylesheets += fmt.Sprintf(
 		"\n"+`<script defer type="module" src="%s"></script>`,
-		TransformPath(self.PathTransformer, path),
+		assetpath.TransformPath(self.PathTransformer, path),
 	)
 
 	return nil
@@ -51,7 +53,7 @@ func (self *RenderingContext) Stylesheet(entryPoint string) error {
 
 	self.stylesheets += fmt.Sprintf(
 		"\n"+`<link rel="stylesheet" type="text/css" href="%s">`,
-		TransformPath(self.PathTransformer, path),
+		assetpath.TransformPath(self.PathTransformer, path),
 	)
 
 	return nil

@@ -1,4 +1,4 @@
-package esbuild
+package assetpath
 
 type PassthroughPathTransformer struct{}
 

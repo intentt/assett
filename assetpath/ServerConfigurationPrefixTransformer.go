@@ -1,4 +1,4 @@
-package esbuild
+package assetpath
 
 import "github.com/intentt/netcfg/netcfg"
 

@@ -1,7 +1,9 @@
 package esbuild
 
+import "github.com/intentt/assett/assetpath"
+
 type RenderingContextFactory struct {
-	PathTransformer PathTransformer
+	PathTransformer assetpath.PathTransformer
 	MetafileIndex   *MetafileIndex
 }
 

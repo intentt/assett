@@ -4,11 +4,12 @@ import (
 	"html/template"
 	"testing"
 
+	"github.com/intentt/assett/assetpath"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRenderPreloadTag(t *testing.T) {
-	pathTransformer := &PassthroughPathTransformer{}
+	pathTransformer := &assetpath.PassthroughPathTransformer{}
 
 	assert.Equal(
 		t,

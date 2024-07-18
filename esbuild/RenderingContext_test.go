@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"testing"
 
+	"github.com/intentt/assett/assetpath"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +15,7 @@ func TestRendering(t *testing.T) {
 
 	renderingContextFactory := &RenderingContextFactory{
 		MetafileIndex:   metafileIndex,
-		PathTransformer: &PassthroughPathTransformer{},
+		PathTransformer: &assetpath.PassthroughPathTransformer{},
 	}
 
 	renderingContext := renderingContextFactory.NewRenderingContext()

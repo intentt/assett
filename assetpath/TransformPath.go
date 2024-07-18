@@ -1,4 +1,4 @@
-package esbuild
+package assetpath
 
 func TransformPath(pathTransformer PathTransformer, path string) string {
 	if IsRemote(path) {

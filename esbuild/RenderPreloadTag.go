@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"path/filepath"
 	"strings"
+
+	"github.com/intentt/assett/assetpath"
 )
 
 func renderAsAttributeValue(ext string) string {
@@ -35,7 +37,7 @@ func renderRelAttribute(ext string) string {
 }
 
 func RenderPreloadTag(
-	PathTransformer PathTransformer,
+	PathTransformer assetpath.PathTransformer,
 	path string,
 ) template.HTML {
 	ext := strings.ToLower(filepath.Ext(path))
@@ -45,7 +47,7 @@ func RenderPreloadTag(
 
 	var crossorigin string
 
-	if "font" == asAttributeValue && IsRemote(path) {
+	if "font" == asAttributeValue && assetpath.IsRemote(path) {
 		crossorigin = " crossorigin"
 	}
 
@@ -60,7 +62,7 @@ func RenderPreloadTag(
 	return template.HTML(fmt.Sprintf(
 		"\n"+`<link rel="%s" href="%s"%s%s>`,
 		relAttribute,
-		TransformPath(PathTransformer, path),
+		assetpath.TransformPath(PathTransformer, path),
 		asAttribute,
 		crossorigin,
 	))
