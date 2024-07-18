@@ -3,108 +3,74 @@ package esbuild
 import (
 	"fmt"
 	"html/template"
-	"path/filepath"
-	"strings"
 )
 
 type RenderingContext struct {
-	CreateClientSideAssetPath CreateClientSideAssetPath
-	MetafileIndex             *MetafileIndex
-	preloadsList              []string
-	stylesheets               []string
+	MetafileIndex   *MetafileIndex
+	PathTransformer PathTransformer
+	preloadables    []string
+	scripts         string
+	stylesheets     string
 }
 
-func (self *RenderingContext) Assets() template.HTML {
-	assetsHtml := ""
-
-	for _, stylesheet := range self.stylesheets {
-		assetsHtml += stylesheet
-	}
-
-	return self.Preloads() + template.HTML(assetsHtml)
+func (self *RenderingContext) RenderAssets() template.HTML {
+	return template.HTML(self.stylesheets + self.scripts)
 }
 
-func (self *RenderingContext) Preloads() template.HTML {
-	preloadsHtml := ""
+func (self *RenderingContext) RenderPreloads() template.HTML {
+	var preloadsHtml template.HTML
 
-	for _, preload := range self.preloadsList {
-		ext := strings.ToLower(filepath.Ext(preload))
-
-		asAttribute := self.getAsAttribute(ext)
-		relAttribute := self.getRelAttribute(ext)
-
-		var crossorigin string
-
-		if "font" == asAttribute {
-			crossorigin = "crossorigin"
-		}
-
-		preloadsHtml += fmt.Sprintf(
-			`<link %s rel="%s" href="%s" as="%s">`+"\n    ",
-			crossorigin,
-			relAttribute,
-			self.doCreateClientSideAssetPath(preload),
-			asAttribute,
-		)
+	for _, preload := range self.preloadables {
+		preloadsHtml += RenderPreloadTag(self.PathTransformer, preload)
 	}
 
 	return template.HTML(preloadsHtml)
 }
 
-func (self *RenderingContext) Stylesheet(entryPoint string) error {
-	imports, err := self.MetafileIndex.GetImports(entryPoint)
+func (self *RenderingContext) Script(entryPoint string) error {
+	path, err := self.registerEntryPoint(entryPoint)
 
 	if err != nil {
 		return err
 	}
 
-	self.preloadsList = append(self.preloadsList, imports...)
-
-	path, err := self.MetafileIndex.GetPath(entryPoint)
-
-	if err != nil {
-		return err
-	}
-
-	self.stylesheets = append(self.stylesheets, fmt.Sprintf(
-		`<link rel="stylesheet" type="text/css" href="%s">`+"\n    ",
-		self.doCreateClientSideAssetPath(path),
-	))
+	self.stylesheets += fmt.Sprintf(
+		"\n"+`<script defer type="module" src="%s"></script>`,
+		TransformPath(self.PathTransformer, path),
+	)
 
 	return nil
 }
 
-func (self *RenderingContext) doCreateClientSideAssetPath(path string) string {
-	if IsUrl(path) {
-		return path
+func (self *RenderingContext) Stylesheet(entryPoint string) error {
+	path, err := self.registerEntryPoint(entryPoint)
+
+	if err != nil {
+		return err
 	}
 
-	return self.CreateClientSideAssetPath(path)
+	self.stylesheets += fmt.Sprintf(
+		"\n"+`<link rel="stylesheet" type="text/css" href="%s">`,
+		TransformPath(self.PathTransformer, path),
+	)
+
+	return nil
 }
 
-func (self *RenderingContext) getAsAttribute(ext string) string {
-	switch ext {
-	case ".css":
-		return "style"
-	case ".js":
-		return "script"
-	case ".woff", ".woff2":
-		return "font"
-	case ".gif", ".jpg", ".jpeg", ".png", ".svg", ".webp":
-		return "image"
-	case ".mp4", ".webm", ".ogg":
-		return "video"
-	case ".mp3", ".wav", ".flac":
-		return "audio"
-	default:
-		return "fetch"
-	}
-}
+func (self *RenderingContext) registerEntryPoint(entryPoint string) (string, error) {
+	preloadables, err := self.MetafileIndex.GetPreloadables(entryPoint)
 
-func (self *RenderingContext) getRelAttribute(ext string) string {
-	if ext == ".js" {
-		return "modulepreload"
+	if err != nil {
+		return "", err
 	}
 
-	return "preload"
+	self.preloadables = append(self.preloadables, preloadables...)
+
+	path, err := self.MetafileIndex.GetOutputPath(entryPoint)
+
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
 }

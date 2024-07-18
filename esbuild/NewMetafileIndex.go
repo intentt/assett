@@ -12,8 +12,8 @@ func NewMetafileIndex(metafileBytes []byte) (*MetafileIndex, error) {
 	}
 
 	metafileIndex := &MetafileIndex{
-		EntryPoints:       make(map[string]*IndexedOutput),
-		EntryPointImports: make(map[string][]string),
+		EntryPoints:            make(map[string]*IndexedOutput),
+		EntryPointPreloadables: make(map[string][]string),
 	}
 
 	for outputFilename, output := range metafile.Outputs {
@@ -23,17 +23,13 @@ func NewMetafileIndex(metafileBytes []byte) (*MetafileIndex, error) {
 		}
 		metafileIndex.EntryPoints[output.EntryPoint] = indexedOutput
 
-		imports := make([]string, 0, len(indexedOutput.Output.Imports))
+		preloadables := make([]string, 0, len(indexedOutput.Output.Imports))
 
 		for _, imprt := range indexedOutput.Output.Imports {
-			if IsUrl(imprt.Path) {
-				imports = append(imports, imprt.Path)
-			} else {
-				imports = append(imports, "/"+imprt.Path)
-			}
+			preloadables = append(preloadables, imprt.Path)
 		}
 
-		metafileIndex.EntryPointImports[output.EntryPoint] = imports
+		metafileIndex.EntryPointPreloadables[output.EntryPoint] = preloadables
 	}
 
 	return metafileIndex, nil
