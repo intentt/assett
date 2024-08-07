@@ -44,7 +44,7 @@ func (self *RenderingContext) Script(entryPoint string) error {
 		}
 	}
 
-	self.stylesheets += fmt.Sprintf(
+	self.scripts += fmt.Sprintf(
 		"\n"+`<script defer type="module" src="%s"></script>`,
 		assetpath.TransformPath(self.PathTransformer, indexedOutput.OutputFilename),
 	)
