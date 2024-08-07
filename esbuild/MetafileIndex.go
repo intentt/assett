@@ -7,6 +7,16 @@ type MetafileIndex struct {
 	EntryPointPreloadables map[string][]string
 }
 
+func (self *MetafileIndex) GetIndexedOutput(entryPoint string) (*IndexedOutput, error) {
+	indexedOutput := self.EntryPoints[entryPoint]
+
+	if indexedOutput == nil {
+		return nil, fmt.Errorf("entry point not found: %s", entryPoint)
+	}
+
+	return indexedOutput, nil
+}
+
 func (self *MetafileIndex) GetPreloadables(entryPoint string) ([]string, error) {
 	imports := self.EntryPointPreloadables[entryPoint]
 
@@ -15,14 +25,4 @@ func (self *MetafileIndex) GetPreloadables(entryPoint string) ([]string, error) 
 	}
 
 	return imports, nil
-}
-
-func (self *MetafileIndex) GetOutputPath(entryPoint string) (string, error) {
-	indexedOutput := self.EntryPoints[entryPoint]
-
-	if indexedOutput == nil {
-		return "", fmt.Errorf("entry point not found: %s", entryPoint)
-	}
-
-	return indexedOutput.OutputFilename, nil
 }

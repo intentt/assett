@@ -30,22 +30,30 @@ func (self *RenderingContext) RenderPreloads() template.HTML {
 }
 
 func (self *RenderingContext) Script(entryPoint string) error {
-	path, err := self.registerEntryPoint(entryPoint)
+	indexedOutput, err := self.registerEntryPoint(entryPoint)
 
 	if err != nil {
 		return err
 	}
 
+	if "" != indexedOutput.Output.CSSBundle {
+		err = self.Stylesheet(indexedOutput.Output.CSSBundle)
+
+		if err != nil {
+			return err
+		}
+	}
+
 	self.stylesheets += fmt.Sprintf(
 		"\n"+`<script defer type="module" src="%s"></script>`,
-		assetpath.TransformPath(self.PathTransformer, path),
+		assetpath.TransformPath(self.PathTransformer, indexedOutput.OutputFilename),
 	)
 
 	return nil
 }
 
 func (self *RenderingContext) Stylesheet(entryPoint string) error {
-	path, err := self.registerEntryPoint(entryPoint)
+	indexedOutput, err := self.registerEntryPoint(entryPoint)
 
 	if err != nil {
 		return err
@@ -53,26 +61,26 @@ func (self *RenderingContext) Stylesheet(entryPoint string) error {
 
 	self.stylesheets += fmt.Sprintf(
 		"\n"+`<link rel="stylesheet" type="text/css" href="%s">`,
-		assetpath.TransformPath(self.PathTransformer, path),
+		assetpath.TransformPath(self.PathTransformer, indexedOutput.OutputFilename),
 	)
 
 	return nil
 }
 
-func (self *RenderingContext) registerEntryPoint(entryPoint string) (string, error) {
+func (self *RenderingContext) registerEntryPoint(entryPoint string) (*IndexedOutput, error) {
 	preloadables, err := self.MetafileIndex.GetPreloadables(entryPoint)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	self.preloadables = append(self.preloadables, preloadables...)
 
-	path, err := self.MetafileIndex.GetOutputPath(entryPoint)
+	indexedOutput, err := self.MetafileIndex.GetIndexedOutput(entryPoint)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return path, nil
+	return indexedOutput, nil
 }

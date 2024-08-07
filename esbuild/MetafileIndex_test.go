@@ -16,7 +16,7 @@ func TestImports(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Contains(t, imports, "static/test_6D5OPEBZ.svg")
-	assert.Contains(t, imports, "https://fonts.gstatic.com/s/notosans/v36/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5aDdu2ui.woff2")
+	assert.Contains(t, imports, "https://fonts/font1.woff2")
 }
 
 func TestPaths(t *testing.T) {
@@ -24,9 +24,9 @@ func TestPaths(t *testing.T) {
 
 	assert.Nil(t, err)
 
-	path, err := metafileIndex.GetOutputPath("resources/css/page-common.css")
+	indexedOutput, err := metafileIndex.GetIndexedOutput("resources/css/page-common.css")
 
 	assert.Nil(t, err)
 
-	assert.Equal(t, path, "static/page-common_DO3RNJ3I.css")
+	assert.Equal(t, indexedOutput.OutputFilename, "static/page-common_DO3RNJ3I.css")
 }

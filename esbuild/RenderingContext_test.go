@@ -22,13 +22,33 @@ func TestRendering(t *testing.T) {
 
 	assert.NotNil(t, renderingContext)
 
-	renderingContext.Stylesheet("resources/css/page-common.css")
+	err = renderingContext.Stylesheet("resources/css/page-common.css")
 
-	assert.Equal(t, renderingContext.RenderPreloads(), template.HTML(`
-<link rel="preload" href="https://fonts.gstatic.com/s/notosans/v36/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5aDdu2ui.woff2" as="font" crossorigin>
-<link rel="preload" href="https://fonts.gstatic.com/s/notosans/v36/o-0bIpQlx3QUlC5A4PNB6Ryti20_6n1iPHjc5a7duw.woff2" as="font" crossorigin>
-<link rel="preload" href="static/test_6D5OPEBZ.svg" as="image">`))
+	assert.Nil(t, err)
 
-	assert.Equal(t, renderingContext.RenderAssets(), template.HTML(`
-<link rel="stylesheet" type="text/css" href="static/page-common_DO3RNJ3I.css">`))
+	err = renderingContext.Script("resources/ts/controller_foo.tsx")
+
+	assert.Nil(t, err)
+
+	assert.Equal(
+		t,
+		template.HTML(`
+<link rel="preload" href="https://fonts/font1.woff2" as="font" crossorigin>
+<link rel="preload" href="https://fonts/font2.woff2" as="font" crossorigin>
+<link rel="preload" href="static/test_6D5OPEBZ.svg" as="image">
+<link rel="modulepreload" href="static/chunk-EMZKCXNJ.js">
+<link rel="modulepreload" href="static/chunk-PI4ZFSEL.js">
+<link rel="preload" href="static/logo_XSTJPNLH.png" as="image">
+<link rel="preload" href="https://fonts/font3.woff2" as="font" crossorigin>`),
+		renderingContext.RenderPreloads(),
+	)
+
+	assert.Equal(
+		t,
+		template.HTML(`
+<link rel="stylesheet" type="text/css" href="static/page-common_DO3RNJ3I.css">
+<link rel="stylesheet" type="text/css" href="static/controller_foo_CX2Z63ZH.css">
+<script defer type="module" src="static/controller_foo_CTJMZK66.js"></script>`),
+		renderingContext.RenderAssets(),
+	)
 }
